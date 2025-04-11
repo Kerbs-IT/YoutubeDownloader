@@ -54,35 +54,49 @@
         document.getElementById("form").addEventListener("submit", function(event) {
             event.preventDefault(); // Prevent default form submission
     
-            let urlInput = document.getElementById("videoURL").value;
-            let urlParams;
+            let urlInput = document.getElementById("videoURL").value.trim();
+            let videoID;
     
             try {
-                urlParams = new URLSearchParams(new URL(urlInput).search);
+                const parsedURL = new URL(urlInput);
+                const hostname = parsedURL.hostname;
+    
+                // Check for regular YouTube link
+                if (hostname.includes("youtube.com")) {
+                    videoID = parsedURL.searchParams.get("v");
+                }
+                // Check for youtu.be short link
+                else if (hostname.includes("youtu.be")) {
+                    videoID = parsedURL.pathname.slice(1); // Remove the leading slash
+                }
             } catch (e) {
                 Swal.fire({
-                    title: "Youtube Link",
-                    text: "Invalid Url, please provide valid URL.",
+                    title: "YouTube Link",
+                    text: "Invalid URL, please provide a valid YouTube link.",
                     icon: "error"
                 });
                 return;
             }
     
-            let videoID = urlParams.get("v");
-    
             if (!videoID) {
-                alert("Invalid YouTube URL! Please enter a valid video link.");
+                Swal.fire({
+                    title: "YouTube Link",
+                    text: "Invalid YouTube URL! Please enter a valid video link.",
+                    icon: "error"
+                });
                 return;
             }
+    
             document.getElementById("videoID").value = videoID; // Set extracted video ID
-
+    
             // Change the button to "Converting" and add the spinner
             let convertButton = document.getElementById("convert-btn");
             convertButton.disabled = true; // Disable button
             convertButton.innerHTML = 'Converting <span class="spinner-border"></span>'; // Add spinner to button text
-
+    
             this.submit(); // Submit form with extracted video ID
         });
     </script>
+    
 </body>
 </html>
